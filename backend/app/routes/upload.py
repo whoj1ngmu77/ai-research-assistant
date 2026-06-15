@@ -28,7 +28,7 @@ async def upload_pdf(file: UploadFile = File(...), user: dict = Depends(get_curr
         raise HTTPException(status_code=500, detail="Failed to save uploaded file")
 
     try:
-        chunks_created = ingest_pdf(saved_path, document_id)
+        chunks_created = ingest_pdf(saved_path, document_id, user["user_id"])
     except Exception as e:
         if os.path.exists(saved_path):
             os.remove(saved_path)

@@ -14,6 +14,7 @@ async def chat(request: ChatRequest, user: dict = Depends(get_current_user)):
     try:
         result = answer_question(
             question=request.question,
+            user_id=user["user_id"],
             document_ids=request.document_ids,
             top_k=request.top_k,
         )

@@ -17,6 +17,7 @@ def add_chunks(chunks: list[dict]):
         - document_id
         - page_number
         - chunk_index
+        - user_id
     """
     ids = []
     embeddings = []
@@ -33,6 +34,7 @@ def add_chunks(chunks: list[dict]):
             "document_id": chunk["document_id"],
             "page_number": chunk["page_number"],
             "chunk_index": chunk["chunk_index"],
+            "user_id": chunk["user_id"],
         })
 
     collection.add(
@@ -48,22 +50,34 @@ def get_collection_count() -> int:
     return collection.count()
 
 
-def search(query_embedding: list[float], top_k: int = 4, document_ids: list[str] | None = None) -> list[dict]:
+def search(
+    query_embedding: list[float],
+    user_id: str,
+    top_k: int = 4,
+    document_ids: list[str] | None = None,
+) -> list[dict]:
     """
-    Finds the top_k most similar chunks to the query embedding.
+    Finds the top_k most similar chunks to the query embedding,
+    scoped to a specific user.
 
     Args:
         query_embedding: embedding vector of the user's question
+        user_id: restrict search to chunks belonging to this user
         top_k: how many results to return
-        document_ids: optional list of document_ids to restrict the search to
-                       (None = search across all uploaded documents)
+        document_ids: optional list of document_ids to further restrict the search to
 
     Returns: list of dicts:
         [{"text": "...", "page_number": 1, "document_id": "...", "distance": 0.23}, ...]
     """
-    where_filter = None
+    conditions = [{"user_id": {"$eq": user_id}}]
+
     if document_ids:
-        where_filter = {"document_id": {"$in": document_ids}}
+        conditions.append({"document_id": {"$in": document_ids}})
+
+    if len(conditions) == 1:
+        where_filter = conditions[0]
+    else:
+        where_filter = {"$and": conditions}
 
     results = collection.query(
         query_embeddings=[query_embedding],

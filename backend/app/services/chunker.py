@@ -3,15 +3,13 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 CHUNK_SIZE = 1000
 CHUNK_OVERLAP = 200
 
-def chunk_pages(pages_data: list[dict], document_id: str) -> list[dict]:
+def chunk_pages(pages_data: list[dict], document_id: str, user_id: str) -> list[dict]:
     """
     Splits page-level text into smaller overlapping chunks.
 
-    Input: pages_data from parse_pdf(), e.g.
-        [{"page_number": 1, "text": "..."}, {"page_number": 2, "text": "..."}]
-
     Output: list of chunk dicts, each with text + metadata:
-        [{"text": "...", "page_number": 1, "chunk_index": 0, "document_id": "..."}, ...]
+        [{"text": "...", "page_number": 1, "chunk_index": 0,
+          "document_id": "...", "user_id": "..."}, ...]
     """
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=CHUNK_SIZE,
@@ -30,6 +28,7 @@ def chunk_pages(pages_data: list[dict], document_id: str) -> list[dict]:
                 "page_number": page["page_number"],
                 "chunk_index": chunk_index,
                 "document_id": document_id,
+                "user_id": user_id,
             })
             chunk_index += 1
 
