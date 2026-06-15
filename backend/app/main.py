@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import upload, chat, sessions
+from app.routes import upload, chat, sessions, analytics
 from app.core.database import engine, Base
 from app.models import db_models
 
@@ -27,6 +27,7 @@ app.add_middleware(
 app.include_router(upload.router)
 app.include_router(chat.router)
 app.include_router(sessions.router)
+app.include_router(analytics.router)
 
 @app.get("/")
 def health_check():

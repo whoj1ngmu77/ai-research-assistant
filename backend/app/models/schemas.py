@@ -48,3 +48,10 @@ class MessageResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class AnalyticsResponse(BaseModel):
+    documents_uploaded: int
+    questions_asked: int
+    avg_response_time_ms: float | None
+    total_chunks_stored: int

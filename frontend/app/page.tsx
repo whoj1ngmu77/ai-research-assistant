@@ -6,6 +6,7 @@ import { PdfUploader } from "@/components/PdfUploader";
 import { ChatInterface } from "@/components/ChatInterface";
 import { AuthButton } from "@/components/AuthButton";
 import { Sidebar } from "@/components/Sidebar";
+import { AnalyticsPanel } from "@/components/AnalyticsPanel";
 import { UploadedDocument } from "@/lib/types";
 
 export default function Home() {
@@ -13,9 +14,11 @@ export default function Home() {
   const [uploadedDocs, setUploadedDocs] = useState<UploadedDocument[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [sidebarRefreshKey, setSidebarRefreshKey] = useState(0);
+  const [analyticsRefreshKey, setAnalyticsRefreshKey] = useState(0);
 
   function handleUploadSuccess(doc: UploadedDocument) {
     setUploadedDocs((prev) => [...prev, doc]);
+    setAnalyticsRefreshKey((prev) => prev + 1);
   }
 
   function handleSelectSession(sessionId: string) {
@@ -29,6 +32,10 @@ export default function Home() {
   function handleSessionCreated(sessionId: string) {
     setActiveSessionId(sessionId);
     setSidebarRefreshKey((prev) => prev + 1);
+  }
+
+  function handleChatComplete() {
+    setAnalyticsRefreshKey((prev) => prev + 1);
   }
 
   const documentIds = uploadedDocs.map((doc) => doc.document_id);
@@ -74,6 +81,8 @@ export default function Home() {
           </p>
         </div>
 
+        <AnalyticsPanel refreshKey={analyticsRefreshKey} />
+
         <PdfUploader onUploadSuccess={handleUploadSuccess} />
 
         {uploadedDocs.length > 0 && (
@@ -97,6 +106,7 @@ export default function Home() {
           uploadedDocs={uploadedDocs}
           sessionId={activeSessionId}
           onSessionCreated={handleSessionCreated}
+          onChatComplete={handleChatComplete}
         />
       </main>
     </div>

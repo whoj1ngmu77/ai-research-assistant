@@ -13,6 +13,7 @@ interface ChatInterfaceProps {
   uploadedDocs: UploadedDocument[];
   sessionId: string | null;
   onSessionCreated: (sessionId: string) => void;
+  onChatComplete: () => void;
 }
 
 export function ChatInterface({
@@ -20,6 +21,7 @@ export function ChatInterface({
   uploadedDocs,
   sessionId,
   onSessionCreated,
+  onChatComplete,
 }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -70,6 +72,8 @@ export function ChatInterface({
       if (!sessionId) {
         onSessionCreated(result.session_id);
       }
+
+      onChatComplete();
     } catch (err) {
       const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
       setMessages((prev) => [

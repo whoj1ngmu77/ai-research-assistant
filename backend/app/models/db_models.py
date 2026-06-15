@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, Text, DateTime, ForeignKey
+from sqlalchemy import Column, String, Text, DateTime, Integer, ForeignKey
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
@@ -36,3 +36,14 @@ class Message(Base):
     created_at = Column(DateTime, default=utc_now)
 
     session = relationship("ChatSession", back_populates="messages")
+
+
+class UsageEvent(Base):
+    __tablename__ = "usage_events"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    user_id = Column(String, index=True, nullable=False)
+    event_type = Column(String, index=True, nullable=False)
+    duration_ms = Column(Integer, nullable=True)
+    chunks_count = Column(Integer, nullable=True)
+    created_at = Column(DateTime, default=utc_now, index=True)

@@ -1,10 +1,11 @@
+import time
 from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session as DBSession
 from app.core.database import get_db
 from app.core.auth import get_current_user
 from app.models.schemas import ChatRequest, ChatResponse
 from app.services.rag_pipeline import answer_question
-from app.services import session_service
+from app.services import session_service, analytics_service
 
 router = APIRouter()
 
@@ -29,6 +30,8 @@ async def chat(
 
     session_service.add_message(db, session_id, role="user", content=request.question)
 
+    start_time = time.perf_counter()
+
     try:
         result = answer_question(
             question=request.question,
@@ -42,8 +45,14 @@ async def chat(
             detail=f"Failed to generate answer: {str(e)}"
         )
 
+    duration_ms = int((time.perf_counter() - start_time) * 1000)
+
     session_service.add_message(
         db, session_id, role="assistant", content=result["answer"], sources=result["sources"]
+    )
+
+    analytics_service.log_event(
+        db, user["user_id"], event_type="chat", duration_ms=duration_ms
     )
 
     return ChatResponse(

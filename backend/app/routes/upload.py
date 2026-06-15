@@ -1,9 +1,12 @@
 import os
 import uuid
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
-from app.services.ingest import ingest_pdf
-from app.models.schemas import UploadResponse
+from sqlalchemy.orm import Session as DBSession
+from app.core.database import get_db
 from app.core.auth import get_current_user
+from app.services.ingest import ingest_pdf
+from app.services import analytics_service
+from app.models.schemas import UploadResponse
 
 router = APIRouter()
 
@@ -12,7 +15,11 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 @router.post("/upload", response_model=UploadResponse)
-async def upload_pdf(file: UploadFile = File(...), user: dict = Depends(get_current_user)):
+async def upload_pdf(
+    file: UploadFile = File(...),
+    db: DBSession = Depends(get_db),
+    user: dict = Depends(get_current_user),
+):
     if not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are allowed")
 
@@ -42,6 +49,10 @@ async def upload_pdf(file: UploadFile = File(...), user: dict = Depends(get_curr
             status_code=400,
             detail="No extractable text found in this PDF. It may be a scanned/image-based document."
         )
+
+    analytics_service.log_event(
+        db, user["user_id"], event_type="upload", chunks_count=chunks_created
+    )
 
     return UploadResponse(
         document_id=document_id,
