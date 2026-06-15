@@ -16,3 +16,10 @@ export interface ChatMessage {
   content: string;
   sources?: SourceChunk[];
 }
+
+export interface ChatSessionSummary {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+}

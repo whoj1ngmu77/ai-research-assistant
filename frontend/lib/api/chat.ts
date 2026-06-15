@@ -6,11 +6,13 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 interface ChatApiResponse {
   answer: string;
   sources: SourceChunk[];
+  session_id: string;
 }
 
 export async function sendChatMessage(
   question: string,
-  documentIds: string[]
+  documentIds: string[],
+  sessionId: string | null
 ): Promise<ChatApiResponse> {
   const session = await getSession();
 
@@ -28,6 +30,7 @@ export async function sendChatMessage(
       question,
       document_ids: documentIds.length > 0 ? documentIds : null,
       top_k: 4,
+      session_id: sessionId,
     }),
   });
 

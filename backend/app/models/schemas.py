@@ -13,6 +13,7 @@ class ChatRequest(BaseModel):
     question: str
     document_ids: list[str] | None = None
     top_k: int = 4
+    session_id: str | None = None
 
 
 class SourceChunk(BaseModel):
@@ -25,6 +26,7 @@ class SourceChunk(BaseModel):
 class ChatResponse(BaseModel):
     answer: str
     sources: list[SourceChunk]
+    session_id: str
 
 
 class SessionResponse(BaseModel):
