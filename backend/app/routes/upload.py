@@ -1,8 +1,9 @@
 import os
 import uuid
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from app.services.ingest import ingest_pdf
 from app.models.schemas import UploadResponse
+from app.core.auth import get_current_user
 
 router = APIRouter()
 
@@ -11,7 +12,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 @router.post("/upload", response_model=UploadResponse)
-async def upload_pdf(file: UploadFile = File(...)):
+async def upload_pdf(file: UploadFile = File(...), user: dict = Depends(get_current_user)):
     if not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are allowed")
 
@@ -29,7 +30,6 @@ async def upload_pdf(file: UploadFile = File(...)):
     try:
         chunks_created = ingest_pdf(saved_path, document_id)
     except Exception as e:
-        # Clean up the saved file if processing failed
         if os.path.exists(saved_path):
             os.remove(saved_path)
         raise HTTPException(

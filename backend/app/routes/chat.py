@@ -1,12 +1,13 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from app.models.schemas import ChatRequest, ChatResponse
 from app.services.rag_pipeline import answer_question
+from app.core.auth import get_current_user
 
 router = APIRouter()
 
 
 @router.post("/chat", response_model=ChatResponse)
-async def chat(request: ChatRequest):
+async def chat(request: ChatRequest, user: dict = Depends(get_current_user)):
     if not request.question.strip():
         raise HTTPException(status_code=400, detail="Question cannot be empty")
 

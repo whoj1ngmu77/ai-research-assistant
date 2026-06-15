@@ -1,4 +1,5 @@
 import { SourceChunk } from "@/lib/types";
+import { getSession } from "next-auth/react";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -11,10 +12,17 @@ export async function sendChatMessage(
   question: string,
   documentIds: string[]
 ): Promise<ChatApiResponse> {
+  const session = await getSession();
+
+  if (!session || !(session as any).apiToken) {
+    throw new Error("You must be signed in to chat.");
+  }
+
   const response = await fetch(`${API_BASE_URL}/chat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${(session as any).apiToken}`,
     },
     body: JSON.stringify({
       question,
