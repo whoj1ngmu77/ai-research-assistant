@@ -242,10 +242,3 @@ Google's embedding model is task-aware — using asymmetric task types for store
 
 ---
 
-## Resume Bullets
-
-- Built a full-stack RAG application with Google OAuth, per-user ChromaDB scoping, and real-time token streaming via Server-Sent Events, deployed on Vercel + Render
-- Designed a RAG pipeline using LangChain chunking, Gemini embeddings with asymmetric RETRIEVAL_DOCUMENT/QUERY task types, and ChromaDB with metadata-filtered multi-tenant retrieval
-- Implemented cross-service JWT authentication (NextAuth frontend to FastAPI backend) using a custom HS256 token to avoid version-dependent JWE decryption
-- Built persistent chat session management with SQLAlchemy + SQLite including auto-titled history, message persistence with JSON-serialized sources, and a collapsible sidebar
-- Added usage analytics with SQLAlchemy aggregate queries (COUNT, AVG, SUM) and a live dashboard tracking documents, questions, response times, and chunk counts
