@@ -2,7 +2,7 @@
 
 A full-stack Retrieval-Augmented Generation (RAG) application that lets you upload PDF documents and ask natural-language questions about them. Answers are grounded in the actual document content, with page-level source citations so you can verify exactly where each answer came from.
 
-**Live Demo:** [ai-research-assistant-lac.vercel.app](https://ai-research-assistant-lac.vercel.app)
+**Live Demo:** [ai-research-assistant-lac.vercel.app]([https://ai-research-assistant-lac.vercel.app)](https://ai-research-assistant-ean8jjj6i.vercel.app)
 **Backend API:** [ai-research-assistant-08j9.onrender.com/docs](https://ai-research-assistant-08j9.onrender.com/docs)
 
 > Note: the backend runs on Render's free tier, which spins down after periods of inactivity. The first request after inactivity may take 30-60 seconds while the server wakes up.
