@@ -14,10 +14,10 @@ A full-stack RAG (Retrieval-Augmented Generation) application where users can up
 - Answers grounded in source documents with page-level citations
 - Collapsible source panel with relevance percentages
 - Multi-document semantic search
-- Authentication** — Google OAuth via NextAuth (Auth.js v5), JWT-based cross-service auth, per-user data isolation in ChromaDB
-- Session Memory** — persistent chat history with SQLite, sidebar listing previous conversations, resume any past session
-- Streaming Responses** — token-by-token answer streaming via Server-Sent Events, answers appear live as Gemini generates them
-- Usage Analytics** — real-time dashboard showing documents uploaded, questions asked, average response time, and total chunks stored
+- Authentication — Google OAuth via NextAuth (Auth.js v5), JWT-based cross-service auth, per-user data isolation in ChromaDB
+- Session Memory — persistent chat history with SQLite, sidebar listing previous conversations, resume any past session
+- Streaming Responses — token-by-token answer streaming via Server-Sent Events, answers appear live as Gemini generates them
+- Usage Analytics — real-time dashboard showing documents uploaded, questions asked, average response time, and total chunks stored
 
 ---
 
