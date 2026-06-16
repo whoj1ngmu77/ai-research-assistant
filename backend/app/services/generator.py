@@ -1,4 +1,5 @@
 from google import genai
+from google.genai import types
 from app.core.config import GEMINI_API_KEY
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 from google.genai.errors import ServerError
@@ -23,16 +24,12 @@ def build_prompt(question: str, chunks: list[dict]) -> str:
         context_blocks.append(
             f"[Excerpt {i+1} - Page {chunk['page_number']}]\n{chunk['text']}"
         )
-
     context_text = "\n\n".join(context_blocks)
-
-    prompt = f"""CONTEXT:
+    return f"""CONTEXT:
 {context_text}
 
 QUESTION:
 {question}"""
-
-    return prompt
 
 
 @retry(
@@ -55,3 +52,23 @@ def generate_answer(question: str, chunks: list[dict]) -> str:
     prompt = build_prompt(question, chunks)
     response = _call_gemini(prompt)
     return response.text
+
+
+async def stream_answer(question: str, chunks: list[dict]):
+    """
+    Async generator that yields text tokens from Gemini one at a time.
+    """
+    prompt = build_prompt(question, chunks)
+
+    response = client.models.generate_content_stream(
+        model=GENERATION_MODEL,
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            system_instruction=SYSTEM_INSTRUCTION,
+            temperature=0.2,
+        ),
+    )
+
+    for chunk in response:
+        if chunk.text:
+            yield chunk.text

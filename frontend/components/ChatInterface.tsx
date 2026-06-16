@@ -3,9 +3,9 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { sendChatMessage } from "@/lib/api/chat";
+import { streamChatMessage } from "@/lib/api/chat";
 import { getSessionMessages } from "@/lib/api/sessions";
-import { ChatMessage, UploadedDocument } from "@/lib/types";
+import { ChatMessage, UploadedDocument, SourceChunk } from "@/lib/types";
 import { MessageBubble } from "@/components/MessageBubble";
 
 interface ChatInterfaceProps {
@@ -61,29 +61,59 @@ export function ChatInterface({
     setInput("");
     setIsLoading(true);
 
-    try {
-      const result = await sendChatMessage(question, documentIds, sessionId);
+    setMessages((prev) => [...prev, { role: "assistant", content: "" }]);
 
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: result.answer, sources: result.sources },
-      ]);
+    let sources: SourceChunk[] = [];
 
-      if (!sessionId) {
-        onSessionCreated(result.session_id);
-      }
-
-      onChatComplete();
-    } catch (err) {
-      const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: message },
-      ]);
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
+    await streamChatMessage(
+      question,
+      documentIds,
+      sessionId,
+      (token) => {
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[updated.length - 1];
+          if (last.role === "assistant") {
+            updated[updated.length - 1] = {
+              ...last,
+              content: last.content + token,
+            };
+          }
+          return updated;
+        });
+      },
+      (receivedSources) => {
+        sources = receivedSources;
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[updated.length - 1];
+          if (last.role === "assistant") {
+            updated[updated.length - 1] = { ...last, sources: receivedSources };
+          }
+          return updated;
+        });
+      },
+      (newSessionId) => {
+        if (!sessionId) {
+          onSessionCreated(newSessionId);
+        }
+      },
+      () => {
+        setIsLoading(false);
+        onChatComplete();
+      },
+      (errorMessage) => {
+        setMessages((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1] = {
+            role: "assistant",
+            content: errorMessage,
+          };
+          return updated;
+        });
+        setIsLoading(false);
+      },
+    );
   }
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
@@ -111,7 +141,7 @@ export function ChatInterface({
           <MessageBubble key={index} message={message} uploadedDocs={uploadedDocs} />
         ))}
 
-        {isLoading && (
+        {isLoading && messages[messages.length - 1]?.content === "" && (
           <div className="flex justify-start">
             <div className="rounded-lg px-3 py-2 bg-muted text-sm text-muted-foreground">
               Thinking...
